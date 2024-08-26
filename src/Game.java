@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.Objects;
 
 public class Game extends JFrame implements ActionListener {
@@ -12,6 +13,8 @@ public class Game extends JFrame implements ActionListener {
     JButton[] buttons;
     char player = 'X';
     int drawPlaceholder = 0;
+    String title = "Tic Tac Toe";
+
     // 2D Array com as condições de vitória
     int[][] winningCombinations = {
             {0, 1, 2}, // linha 1
@@ -29,7 +32,7 @@ public class Game extends JFrame implements ActionListener {
         //Label
         this.text = new JLabel();
         text.setForeground(Color.white);
-        text.setText("Jogo da velha");
+        text.setText(title);
         text.setFont(new Font("MV Boli", Font.PLAIN, 50));
 
         //Header
@@ -58,11 +61,14 @@ public class Game extends JFrame implements ActionListener {
                 }
             });
         }
+    }
+
+    public void frame(){
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(850,850);
         this.setLayout(new BorderLayout());
-        this.setTitle("Tic Tac Toe game");
+        this.setTitle("Tic Tac Toe Game");
         this.setVisible(true);
         this.setResizable(false);
         this.add(header, BorderLayout.NORTH);
@@ -71,7 +77,7 @@ public class Game extends JFrame implements ActionListener {
 
     // Jogador faz uma jogada
     public void makeAMove(JButton clickedButton){
-        // Antes de realizar a jogada, checa se ela é valida
+        // Antes de realizar a jogada, verifica se ela é valida
         if (!moveIsValid(clickedButton)){
             System.out.println("Movimento inválido");
         } else{
@@ -81,13 +87,33 @@ public class Game extends JFrame implements ActionListener {
             if (checkWinCondition()){
                 text.setText(player + " Venceu");
                 disableAllButtons();
+
+                if (playAgain() == 0){
+                    clearBoard();
+                    enableAllButtons();
+
+                    text.setText(title);
+                    return;
+                }
+
+                this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
                 return;
             }
 
-            // Vertifica se a partida empatou
+            // Verifica se a partida empatou
             if (checkDraw(buttons)) {
                 text.setText("Empate");
                 disableAllButtons();
+
+                if (playAgain() == 0){
+                    clearBoard();
+                    enableAllButtons();
+
+                    text.setText(title);
+                    return;
+                }
+
+                this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
                 return;
             }
 
@@ -110,7 +136,7 @@ public class Game extends JFrame implements ActionListener {
         }
     }
 
-    // Checa se algum jogador ganhou o jogo
+    // Verifica se algum jogador ganhou o jogo
     public boolean checkWinCondition(){
         for (int[] combination : winningCombinations) {
             if (Objects.equals(buttons[combination[0]].getText(), String.valueOf(player)) &&
@@ -132,10 +158,26 @@ public class Game extends JFrame implements ActionListener {
         return true;
     }
 
-    /*public int playAgain(){
+    // Pergunta se o jogador quer jogar novamente
+    public int playAgain(){
         JOptionPane pane = new JOptionPane();
         int answer = JOptionPane.showConfirmDialog(null, "Do you want to continue?", "Question", JOptionPane.YES_NO_OPTION);
-    }*/
+        return answer;
+    }
+
+    // Limpa o tabuleiro
+    public void clearBoard(){
+        for (int i=0; i < buttons.length; i++){
+            buttons[i].setText(" ");
+        }
+    }
+
+    // Habilita os botões
+    public void enableAllButtons(){
+        for (JButton button : buttons){
+            button.setEnabled(true);
+        }
+    }
 
     // Desabilita os botões
     public void disableAllButtons(){
