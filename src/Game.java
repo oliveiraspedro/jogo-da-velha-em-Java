@@ -11,6 +11,8 @@ public class Game extends JFrame implements ActionListener {
     JPanel buttonPanel;
     JButton[] buttons;
     char player = 'X';
+    int drawPlaceholder = 0;
+    // 2D Array com as condições de vitória
     int[][] winningCombinations = {
             {0, 1, 2}, // linha 1
             {3, 4, 5}, // linha 2
@@ -44,6 +46,7 @@ public class Game extends JFrame implements ActionListener {
         for (int i = 0; i < 9; i++){
             buttons[i] = new JButton();
             buttonPanel.add(buttons[i]);
+            buttons[i].setText(" ");
             buttons[i].setFocusable(false);
             buttons[i].setFont(new Font("MV Boli", Font.PLAIN, 80));
 
@@ -66,31 +69,39 @@ public class Game extends JFrame implements ActionListener {
         this.add(buttonPanel);
     }
 
+    // Jogador faz uma jogada
     public void makeAMove(JButton clickedButton){
+        // Antes de realizar a jogada, checa se ela é valida
         if (!moveIsValid(clickedButton)){
             System.out.println("Movimento inválido");
-        }
-        clickedButton.setText(String.valueOf(player));
+        } else{
+            clickedButton.setText(String.valueOf(player)); // Coloca o simbolo do jogador no botão que ele clicou
 
-        if (checkWinCondition()){
-            text.setText(player + " Venceu");
-            disableAllButtons();
-            return;
-        }
+            // Verifica se o jogador ganhou a partida
+            if (checkWinCondition()){
+                text.setText(player + " Venceu");
+                disableAllButtons();
+                return;
+            }
 
-        changePlayer();
-        text.setText("Vez do Jogador " + player);
+            // Vertifica se a partida empatou
+            if (checkDraw(buttons)) {
+                text.setText("Empate");
+                disableAllButtons();
+                return;
+            }
+
+            changePlayer(); // Se o jogador não ganhou a partida, muda a vez do jogador
+            text.setText("Vez do Jogador " + player);
+        }
     }
 
+    // Checa se a jogada é valida
     public boolean moveIsValid(JButton clickedButton){
-        if (Objects.equals(clickedButton.getText(), "X") || Objects.equals(clickedButton.getText(), "O")){
-            System.out.println("Movimento inválido");
-            return false;
-        } else {
-            return true;
-        }
+        return Objects.equals(clickedButton.getText(), " ");
     }
 
+    // Muda a vez do jogador
     public void changePlayer(){
         if (player == 'X'){
             player = 'O';
@@ -99,17 +110,34 @@ public class Game extends JFrame implements ActionListener {
         }
     }
 
+    // Checa se algum jogador ganhou o jogo
     public boolean checkWinCondition(){
         for (int[] combination : winningCombinations) {
             if (Objects.equals(buttons[combination[0]].getText(), String.valueOf(player)) &&
-                Objects.equals(buttons[combination[1]].getText(), String.valueOf(player)) &&
-                Objects.equals(buttons[combination[2]].getText(), String.valueOf(player))) {
+                    Objects.equals(buttons[combination[1]].getText(), String.valueOf(player)) &&
+                    Objects.equals(buttons[combination[2]].getText(), String.valueOf(player))) {
                 return true; // Retorna verdadeiro se uma condição de vitória for encontrada
             }
         }
         return false;
     }
 
+    public boolean checkDraw(JButton[] buttons){
+        for (JButton button : buttons) {
+            if (button.getText().trim().isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*public int playAgain(){
+        JOptionPane pane = new JOptionPane();
+        int answer = JOptionPane.showConfirmDialog(null, "Do you want to continue?", "Question", JOptionPane.YES_NO_OPTION);
+    }*/
+
+    // Desabilita os botões
     public void disableAllButtons(){
         for (JButton button : buttons){
             button.setEnabled(false);
@@ -117,7 +145,6 @@ public class Game extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
+    public void actionPerformed(ActionEvent e) {}
 }
+
